@@ -6,8 +6,7 @@
 
 请勿直接修改 .env，然后提交到 github，源码仓库是公开的，别人可以直接看到你的账号密码。因为错误使用本仓库导致账号密码泄漏，本人概不负责！！！
 # 青龙拉库地址
-ql repo https://github.com/Aijiaobin/Cloud189Checkin.git 
-"src|.env" "image" "src|.eslintrc.js|accounts.js|config.js|serverChan.js|telegramBot.js|wecomBot.js|wxPusher.js|.env" "main" "js"  "rm -rf /ql/data/repo/wes-lin_Cloud189Checkin"
+```ql repo https://github.com/Aijiaobin/Cloud189Checkin.git "src|.env" "image" "src|.eslintrc.js|accounts.js|config.js|serverChan.js|telegramBot.js|wecomBot.js|wxPusher.js|.env" "main" "js"  "rm -rf /ql/data/repo/wes-lin_Cloud189Checkin"```
 
 ## 交流群
 
