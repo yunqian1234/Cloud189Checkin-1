@@ -21,10 +21,10 @@ const logger = log4js.getLogger();
 // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 const superagent = require("superagent");
 const { CloudClient } = require("cloud189-sdk");
-const serverChan = require("./push/serverChan");
-const telegramBot = require("./push/telegramBot");
-const wecomBot = require("./push/wecomBot");
-const wxpush = require("./push/wxPusher");
+// const serverChan = require("./push/serverChan");
+// const telegramBot = require("./push/telegramBot");
+// const wecomBot = require("./push/wecomBot");
+// const wxpush = require("./push/wxPusher");
 const accounts = require("../accounts");
 
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
@@ -188,10 +188,10 @@ const pushWxPusher = (title, desp) => {
 };
 
 const push = (title, desp) => {
-  pushServerChan(title, desp);
-  pushTelegramBot(title, desp);
-  pushWecomBot(title, desp);
-  pushWxPusher(title, desp);
+  // pushServerChan(title, desp);
+  // pushTelegramBot(title, desp);
+  // pushWecomBot(title, desp);
+  // pushWxPusher(title, desp);
     // 调用 pushPlusNotify 发送通知
   pushPlusNotify("title", desp);
 };
