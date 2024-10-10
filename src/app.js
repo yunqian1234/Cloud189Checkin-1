@@ -1,6 +1,6 @@
 
 /* eslint-disable no-await-in-loop */
-const $ = new Env('天翼网盘签到');
+/*const $ = new Env('天翼网盘签到');*/
 require("dotenv").config();
 const { pushPlusNotify } = require('./sendNotify.js');
 const log4js = require("log4js");
