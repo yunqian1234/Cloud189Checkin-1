@@ -1164,6 +1164,7 @@ function PushMeNotify(text, desp, params = {}) {
 module.exports = {
   sendNotify,
   BARK_PUSH,
+  pushPlusNotify,
 };
 
 // prettier-ignore
