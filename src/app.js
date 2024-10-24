@@ -26,6 +26,7 @@ const { CloudClient } = require("cloud189-sdk");
 // const wecomBot = require("./push/wecomBot");
 // const wxpush = require("./push/wxPusher");
 const accounts = require("../accounts");
+const {sendNotify} = require("./sendNotify");
 
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
 
@@ -194,7 +195,8 @@ const push = (title, desp) => {
   // pushWxPusher(title, desp);
     // 调用 pushPlusNotify 发送通知
 
-  pushPlusNotify("title", desp);
+  // pushPlusNotify("title", desp);
+  sendNotify("title", desp)
 };
 
 // 开始执行程序
