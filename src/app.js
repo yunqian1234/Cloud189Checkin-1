@@ -199,7 +199,6 @@ const push = (title, desp) => {
   sendNotify("title", desp)
 };
 
-
 // 开始执行程序
 async function main() {
   for (let index = 0; index < accounts.length; index += 1) {
