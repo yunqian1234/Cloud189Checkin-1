@@ -196,7 +196,7 @@ const push = (title, desp) => {
     // 调用 pushPlusNotify 发送通知
 
   // pushPlusNotify("title", desp);
-  sendNotify("title", desp)
+  sendNotify("天翼网盘自动签到", desp)
 };
 
 // 开始执行程序
