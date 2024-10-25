@@ -25,7 +25,7 @@ const { CloudClient } = require("cloud189-sdk");
 // const telegramBot = require("./push/telegramBot");
 // const wecomBot = require("./push/wecomBot");
 // const wxpush = require("./push/wxPusher");
-const accounts = require("../accounts");
+const accounts = require("./accounts");
 const {sendNotify} = require("./sendNotify");
 
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
