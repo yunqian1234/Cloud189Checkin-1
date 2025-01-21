@@ -1,6 +1,6 @@
 
 /* eslint-disable no-await-in-loop */
-/*const $ = new Env('天翼网盘签到');*/
+/*const $ = new Env('天翼网盘家庭签到');*/
 require("dotenv").config();
 const { pushPlusNotify } = require('./sendNotify.js');
 const log4js = require("log4js");
@@ -27,7 +27,13 @@ const { CloudClient } = require("cloud189-sdk");
 // const wxpush = require("./push/wxPusher");
 const accounts = require("./accounts");
 const {sendNotify} = require("./sendNotify");
+const myfamilyID = process.env.familyID;
 
+if (myfamilyID) {
+    console.log(`familyID 的值是: ${myfamilyID}`);
+} else {
+    console.log('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
+}
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
 
 const buildTaskResult = (res, result) => {
@@ -67,7 +73,7 @@ const doFamilyTask = async (cloudClient) => {
     for (let index = 0; index < familyInfoResp.length; index += 1) {
       const { familyId } = familyInfoResp[index];
       console.log(familyId)
-      const res = await cloudClient.familyUserSign(familyId);
+      const res = await cloudClient.familyUserSign(myfamilyId);
       result.push(
         "家庭任务" +
           `${res.signStatus ? "已经签到过了，" : ""}签到获得${
