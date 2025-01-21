@@ -27,13 +27,7 @@ const { CloudClient } = require("cloud189-sdk");
 // const wxpush = require("./push/wxPusher");
 const accounts = require("./accounts");
 const {sendNotify} = require("./sendNotify");
-const myfamilyID = process.env.familyID;
 
-if (myfamilyID) {
-    console.log(`familyID 的值是: ${myfamilyID}`);
-} else {
-    console.log('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
-}
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
 
 const buildTaskResult = (res, result) => {
@@ -68,12 +62,19 @@ const doTask = async (cloudClient) => {
 
 const doFamilyTask = async (cloudClient) => {
   const { familyInfoResp } = await cloudClient.getFamilyList();
+  const myfamilyID = process.env.familyID;
+
+  if (myfamilyID) {
+      console.log(`签到familyID 的值是: ${myfamilyID}`);
+  } else {
+      console.log('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
+  }
   const result = [];
   if (familyInfoResp) {
     for (let index = 0; index < familyInfoResp.length; index += 1) {
       const { familyId } = familyInfoResp[index];
-      console.log(familyId)
-      const res = await cloudClient.familyUserSign(myfamilyId);
+      console.log(`本账号的familyID 的值是: ${familyId}`)
+      const res = await cloudClient.familyUserSign(myfamilyID);
       result.push(
         "家庭任务" +
           `${res.signStatus ? "已经签到过了，" : ""}签到获得${
