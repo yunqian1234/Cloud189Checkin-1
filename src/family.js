@@ -45,7 +45,6 @@ const doTask = async (cloudClient, userNameInfo) => {
 
     const res2 = await cloudClient.taskSign();
     buildTaskResult(res2, result);
-    logger.info(`用户 ${userNameInfo} 本次签到结果: ${result.join(", ")}`)
     return result;
 };
 
@@ -53,30 +52,28 @@ const doFamilyTask = async (cloudClient, userNameInfo) => {
     const { familyInfoResp } = await cloudClient.getFamilyList();
     const myfamilyID = process.env.FAMILYID || '';
     let totalBonusSpace = 0;
+    let familyTaskResult = "";
 
     if (myfamilyID) {
-        logger.info(`签到familyID 的值是: ${myfamilyID}`);
+          logger.debug(`签到familyID 的值是: ${myfamilyID}`);
     } else {
-        logger.info('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
+          logger.debug('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
     }
-    const result = [];
     if (familyInfoResp) {
         for (let index = 0; index < familyInfoResp.length; index += 1) {
             const { familyId } = familyInfoResp[index];
-            logger.info(`本账号的familyID 的值是: ${familyId}`);
+            logger.debug(`本账号的familyID 的值是: ${familyId}`);
             const res = await cloudClient.familyUserSign(myfamilyID);
             const bonusSpace = res.bonusSpace || 0;
             totalBonusSpace += bonusSpace;
-            result.push(
-                `家庭签到获得${
-                    bonusSpace
-                }M空间`
-            );
+            familyTaskResult  += `  签到获得${
+                bonusSpace
+            }M空间`
 
         }
-        logger.info(`用户 ${userNameInfo} 本次家庭签到结果: ${result.join(", ")}`);
     }
-    return { result, totalBonusSpace };
+       logger.info(`用户${userNameInfo}家庭任务: ${familyTaskResult}`);
+    return { totalBonusSpace };
 };
 
 const push = (title, desp) => {
@@ -143,13 +140,14 @@ async function main() {
            return;
        }
 
+
     for (let index = 0; index < accounts.length; index += 1) {
         const account = accounts[index];
         const { userName, password } = account;
         if (userName && password) {
             const userNameInfo = mask(userName, 3, 7);
             try {
-                logger.info(`账户 ${userNameInfo}开始执行`);
+
                 const cloudClient = new CloudClient(userName, password);
 
                 let token = await loadToken(userName);
@@ -168,36 +166,15 @@ async function main() {
                     await cloudClient.login();
                     await saveToken(userName, cloudClient.session, cloudClient.cookie);
                 }
+               await doTask(cloudClient, userNameInfo);
+               const { totalBonusSpace } = await doFamilyTask(cloudClient, userNameInfo);
+               totalFamilyBonusSpace += totalBonusSpace;
 
-                await doTask(cloudClient, userNameInfo);
-
-
-                const { result: familyResult, totalBonusSpace } = await doFamilyTask(cloudClient, userNameInfo);
-                totalFamilyBonusSpace += totalBonusSpace;
-                logger.info(`用户 ${userNameInfo} 本次家庭签到获得 ${totalBonusSpace}M空间`);
-
-                logger.info("任务执行完毕");
-                const { cloudCapacityInfo, familyCapacityInfo } = await cloudClient.getUserSizeInfo();
-                logger.info(
-                    `个人总容量：${(
-                        cloudCapacityInfo.totalSize /
-                        1024 /
-                        1024 /
-                        1024
-                    ).toFixed(2)}G,家庭总容量：${(
-                        familyCapacityInfo.totalSize /
-                        1024 /
-                        1024 /
-                        1024
-                    ).toFixed(2)}G`
-                );
             } catch (e) {
                 logger.error(e);
                 if (e.code === "ETIMEDOUT") {
                     throw e;
                 }
-            } finally {
-                logger.info(`账户 ${userNameInfo}执行完毕`);
             }
         }
     }
