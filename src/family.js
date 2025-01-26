@@ -123,15 +123,24 @@ async function validateToken(cloudClient) {
 
 async function main() {
     let totalFamilyBonusSpace = 0;
-    let accounts = [];
+     let accounts = [];
         try {
-          const tyAccounts = process.env.TY_ACCOUNTS || '[]';
-           const cleanedAccounts = tyAccounts.replace(/[\r\n\t]+/g, '').trim();
+            const tyAccounts = process.env.TY_ACCOUNTS || '[]';
+            console.log('Raw TY_ACCOUNTS:', tyAccounts);  // 打印原始环境变量
+             const cleanedAccounts = tyAccounts.replace(/[\r\n\t]+/g, '').trim();
+             console.log('Single-Line TY_ACCOUNTS:', cleanedAccounts); // 打印处理后的单行字符串
             accounts = JSON.parse(cleanedAccounts);
         } catch (error) {
              console.error('Failed to parse TY_ACCOUNTS from process.env:', process.env.TY_ACCOUNTS,'Error:', error);
             return;
         }
+
+       if (!process.env.PUSH_PLUS_TOKEN) {
+           logger.error('PUSH_PLUS_TOKEN is missing in environment variables.');
+           return;
+       }
+
+
     for (let index = 0; index < accounts.length; index += 1) {
         const account = accounts[index];
         const { userName, password } = account;
