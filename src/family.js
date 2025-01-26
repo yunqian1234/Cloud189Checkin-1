@@ -68,11 +68,11 @@ const doFamilyTask = async (cloudClient, userNameInfo, isFirstAccount) => {
                logger.debug(`本账号的familyID 的值是: ${familyId}`);
              }
             const res = await cloudClient.familyUserSign(myfamilyID);
-             const bonusSpace = res.bonusSpace || 0;
-             totalBonusSpace += bonusSpace;
+            const bonusSpace = res.bonusSpace || 0;
+            totalBonusSpace += bonusSpace;
             familyTaskResult  += `  签到获得${
-                 bonusSpace
-             }M空间`
+                bonusSpace
+            }M空间`
 
         }
     }
@@ -84,30 +84,18 @@ const push = (title, desp) => {
 };
 
 const tokenDir = path.join(__dirname, 'tokens');
+
+// 修改 saveToken 函数，不再保存 token
 async function saveToken(userName, session, cookie) {
-    try {
-        await fs.access(tokenDir);
-    } catch (error) {
-        await fs.mkdir(tokenDir, { recursive: true });
-    }
-    const tokenFile = path.join(tokenDir, `${userName}.json`);
-    const tokenData = { session, cookie };
-    await fs.writeFile(tokenFile, JSON.stringify(tokenData), 'utf-8');
-    logger.debug(`用户 ${userName} Token 已保存到 ${tokenFile}`);
+    logger.debug(`用户 ${userName} Token 已保存到内存中，不保存到文件`);
 }
 
+// 修改 loadToken 函数，直接返回 null，表示不加载 token
 async function loadToken(userName) {
-    const tokenFile = path.join(tokenDir, `${userName}.json`);
-    try {
-        const data = await fs.readFile(tokenFile, 'utf-8');
-        const { session, cookie } = JSON.parse(data);
-        logger.debug(`用户 ${userName} Token 从 ${tokenFile} 加载成功`);
-        return { session, cookie };
-    } catch (e) {
-        logger.debug(`用户 ${userName} Token 加载失败，需要重新登录`);
-        return null;
-    }
+     logger.debug(`用户 ${userName} 不加载缓存 Token，每次都重新登录`);
+    return null;
 }
+
 
 async function validateToken(cloudClient) {
     try {
@@ -143,21 +131,17 @@ async function main() {
         return;
     }
 
-
-    for (let index = 0; index < accounts.length; index += 1) {
-        const account = accounts[index];
+  const allTasks = accounts.map(async (account, index) => {
         const { userName, password } = account;
         if (userName && password) {
             const userNameInfo = mask(userName, 3, 7);
-             const isFirstAccount = index === 0;
+           const isFirstAccount = index === 0;
             try {
-
                 const cloudClient = new CloudClient(userName, password);
-
                 let token = await loadToken(userName);
                 let loggedIn = false;
 
-                if (token && token.session && token.cookie) {
+                 if (token && token.session && token.cookie) {
                     cloudClient.session = token.session;
                     cloudClient.cookie = token.cookie;
                     if (await validateToken(cloudClient)) {
@@ -167,13 +151,14 @@ async function main() {
                 }
 
                 if (!loggedIn) {
-                    await cloudClient.login();
-                    await saveToken(userName, cloudClient.session, cloudClient.cookie);
+                     await cloudClient.login();
+                     await saveToken(userName, cloudClient.session, cloudClient.cookie);
                 }
+
                 await doTask(cloudClient, userNameInfo);
-                 const { familyTaskResult, totalBonusSpace } = await doFamilyTask(cloudClient, userNameInfo,isFirstAccount);
+                const { familyTaskResult, totalBonusSpace } = await doFamilyTask(cloudClient, userNameInfo,isFirstAccount);
                 totalFamilyBonusSpace += totalBonusSpace;
-                  logger.info(`账号${index + 1} 用户${userNameInfo}家庭任务:${familyTaskResult}`);
+                logger.info(`账号${index + 1} 用户${userNameInfo}家庭任务:${familyTaskResult}`);
 
             } catch (e) {
                 logger.error(e);
@@ -182,7 +167,9 @@ async function main() {
                 }
             }
         }
-    }
+    });
+
+    await Promise.all(allTasks)
     logger.info(`所有账号家庭签到总共获得 ${totalFamilyBonusSpace / 2}M空间`);
 }
 (async () => {
