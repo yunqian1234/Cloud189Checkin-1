@@ -21,8 +21,6 @@ const { sendNotify } = require("./sendNotify");
 
 const fs = require('fs').promises;
 const path = require('path');
-const getAccounts = require("./accounts.js");
-const accounts = getAccounts();
 
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
 
@@ -125,6 +123,15 @@ async function validateToken(cloudClient) {
 
 async function main() {
     let totalFamilyBonusSpace = 0;
+     let accounts = [];
+        try {
+           const tyAccounts =  '${{ secrets.TY_ACCOUNTS }}';
+           const cleanedAccounts = tyAccounts.replace(/[\r\n\t]+/g, '').trim();
+            accounts = JSON.parse(cleanedAccounts);
+        } catch (error) {
+           console.error('Failed to parse TY_ACCOUNTS from secrets:', '${{ secrets.TY_ACCOUNTS }}','Error:', error);
+           return;
+        }
     for (let index = 0; index < accounts.length; index += 1) {
         const account = accounts[index];
         const { userName, password } = account;
