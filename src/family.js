@@ -127,18 +127,8 @@ async function main() {
         // 从环境变量中读取 TY_ACCOUNTS
         const tyAccounts = process.env.TY_ACCOUNTS || '[]';
 
-        // 如果 TY_ACCOUNTS 被部分隐藏（包含 ***），尝试提取有效部分
-        const validJson = tyAccounts
-            .replace(/\*\*\*/g, '') // 去除 ***
-            .replace(/(\w+):/g, '"$1":') // 将 userName: 转换为 "userName":
-            .replace(/(\w+),/g, '"$1",') // 将 password: 转换为 "password":
-            .trim();
-
-        // 确保外层有中括号
-        const wrappedJson = `[${validJson}]`;
-
-        // 解析 JSON
-        accounts = JSON.parse(wrappedJson);
+        // 直接解析 JSON
+        accounts = JSON.parse(tyAccounts);
     } catch (error) {
         console.error('Failed to parse TY_ACCOUNTS:', error);
         console.error('TY_ACCOUNTS value:', process.env.TY_ACCOUNTS);
