@@ -21,7 +21,8 @@ const { sendNotify } = require("./sendNotify");
 
 const fs = require('fs').promises;
 const path = require('path');
-const accounts = require("./accounts.js");
+const getAccounts = require("./accounts.js");
+const accounts = getAccounts();
 
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
 
