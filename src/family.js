@@ -48,21 +48,25 @@ const doTask = async (cloudClient, userNameInfo) => {
     return result;
 };
 
-const doFamilyTask = async (cloudClient, userNameInfo) => {
+const doFamilyTask = async (cloudClient, userNameInfo, isFirstAccount) => {
     const { familyInfoResp } = await cloudClient.getFamilyList();
     const myfamilyID = process.env.FAMILYID || '';
     let totalBonusSpace = 0;
     let familyTaskResult = "";
 
-    if (myfamilyID) {
-          logger.debug(`签到familyID 的值是: ${myfamilyID}`);
+     if (myfamilyID) {
+        logger.debug(`签到familyID 的值是: ${myfamilyID}`);
     } else {
-          logger.debug('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
+        logger.debug('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
     }
     if (familyInfoResp) {
         for (let index = 0; index < familyInfoResp.length; index += 1) {
             const { familyId } = familyInfoResp[index];
-            logger.debug(`本账号的familyID 的值是: ${familyId}`);
+            if (isFirstAccount){
+             logger.info(`本账号的familyID 的值是: ${familyId}`);
+            } else{
+               logger.debug(`本账号的familyID 的值是: ${familyId}`);
+            }
             const res = await cloudClient.familyUserSign(myfamilyID);
             const bonusSpace = res.bonusSpace || 0;
             totalBonusSpace += bonusSpace;
@@ -72,7 +76,7 @@ const doFamilyTask = async (cloudClient, userNameInfo) => {
 
         }
     }
-       logger.info(`用户${userNameInfo}家庭任务: ${familyTaskResult}`);
+      logger.info(`用户${userNameInfo}家庭任务:${familyTaskResult}`);
     return { totalBonusSpace };
 };
 
@@ -123,33 +127,31 @@ async function validateToken(cloudClient) {
 
 async function main() {
     let totalFamilyBonusSpace = 0;
-     let accounts = [];
-        try {
-            const tyAccounts = process.env.TY_ACCOUNTS || '[]';
-            logger.debug('Raw TY_ACCOUNTS:', tyAccounts);
-             const cleanedAccounts = tyAccounts.replace(/[\r\n\t]+/g, '').trim();
-            logger.debug('Single-Line TY_ACCOUNTS:', cleanedAccounts);
-            accounts = JSON.parse(cleanedAccounts);
-        } catch (error) {
-             logger.error('Failed to parse TY_ACCOUNTS from process.env:', process.env.TY_ACCOUNTS,'Error:', error);
-            return;
-        }
+    let accounts = [];
+    try {
+        const tyAccounts = process.env.TY_ACCOUNTS || '[]';
+        logger.debug('Raw TY_ACCOUNTS:', tyAccounts);
+        const cleanedAccounts = tyAccounts.replace(/[\r\n\t]+/g, '').trim();
+        logger.debug('Single-Line TY_ACCOUNTS:', cleanedAccounts);
+        accounts = JSON.parse(cleanedAccounts);
+    } catch (error) {
+        logger.error('Failed to parse TY_ACCOUNTS from process.env:', process.env.TY_ACCOUNTS, 'Error:', error);
+        return;
+    }
 
-       if (!process.env.PUSH_PLUS_TOKEN) {
-           logger.error('PUSH_PLUS_TOKEN is missing in environment variables.');
-           return;
-       }
-
+    if (!process.env.PUSH_PLUS_TOKEN) {
+        logger.error('PUSH_PLUS_TOKEN is missing in environment variables.');
+        return;
+    }
 
     for (let index = 0; index < accounts.length; index += 1) {
         const account = accounts[index];
         const { userName, password } = account;
         if (userName && password) {
             const userNameInfo = mask(userName, 3, 7);
+             const isFirstAccount = index === 0;
             try {
-
                 const cloudClient = new CloudClient(userName, password);
-
                 let token = await loadToken(userName);
                 let loggedIn = false;
 
@@ -166,9 +168,10 @@ async function main() {
                     await cloudClient.login();
                     await saveToken(userName, cloudClient.session, cloudClient.cookie);
                 }
-               await doTask(cloudClient, userNameInfo);
-               const { totalBonusSpace } = await doFamilyTask(cloudClient, userNameInfo);
-               totalFamilyBonusSpace += totalBonusSpace;
+              await  doTask(cloudClient, userNameInfo);
+                const { familyTaskResult, totalBonusSpace } = await doFamilyTask(cloudClient, userNameInfo,isFirstAccount);
+                totalFamilyBonusSpace += totalBonusSpace;
+                logger.info(`账号${index + 1} 用户${userNameInfo}家庭任务:${familyTaskResult}`)
 
             } catch (e) {
                 logger.error(e);
