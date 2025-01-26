@@ -123,14 +123,14 @@ async function validateToken(cloudClient) {
 
 async function main() {
     let totalFamilyBonusSpace = 0;
-     let accounts = [];
+    let accounts = [];
         try {
-           const tyAccounts =  '${{ secrets.TY_ACCOUNTS }}';
+          const tyAccounts = process.env.TY_ACCOUNTS || '[]';
            const cleanedAccounts = tyAccounts.replace(/[\r\n\t]+/g, '').trim();
             accounts = JSON.parse(cleanedAccounts);
         } catch (error) {
-           console.error('Failed to parse TY_ACCOUNTS from secrets:', '${{ secrets.TY_ACCOUNTS }}','Error:', error);
-           return;
+             console.error('Failed to parse TY_ACCOUNTS from process.env:', process.env.TY_ACCOUNTS,'Error:', error);
+            return;
         }
     for (let index = 0; index < accounts.length; index += 1) {
         const account = accounts[index];
