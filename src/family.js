@@ -124,7 +124,14 @@ async function validateToken(cloudClient) {
 async function main() {
     let accounts = [];
     try {
-        accounts = JSON.parse(process.env.TY_ACCOUNTS || '[]');
+        // 从环境变量中读取 TY_ACCOUNTS
+        const tyAccounts = process.env.TY_ACCOUNTS || '[]';
+
+        // 如果 TY_ACCOUNTS 被部分隐藏（包含 ***），尝试提取有效部分
+        const validJson = tyAccounts.replace(/\*\*\*/g, '').trim();
+
+        // 解析 JSON
+        accounts = JSON.parse(validJson);
     } catch (error) {
         console.error('Failed to parse TY_ACCOUNTS:', error);
         console.error('TY_ACCOUNTS value:', process.env.TY_ACCOUNTS);
@@ -193,7 +200,6 @@ async function main() {
     }
     logger.info(`所有账号家庭签到总共获得 ${totalFamilyBonusSpace / 2}M空间`);
 }
-
 (async () => {
     try {
         await main();
