@@ -57,7 +57,7 @@ const doFamilyTask = async (cloudClient, userNameInfo, isFirstAccount) => {
     if (myfamilyID) {
         logger.debug(`签到familyID 的值是: ${myfamilyID}`);
     } else {
-        logger.debug('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
+        logger.info('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
     }
     if (familyInfoResp) {
         for (let index = 0; index < familyInfoResp.length; index += 1) {
