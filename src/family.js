@@ -29,22 +29,23 @@ const buildTaskResult = (res, result) => {
     if (res.errorCode === "User_Not_Chance") {
         result.push(`第${index}次抽奖失败,次数不足`);
     } else {
-        result.push(`第${index}次抽奖成功,抽奖获得${res.prizeName}`);
+        result.push(`抽奖获得${res.prizeName}`);
     }
 };
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const doTask = async (cloudClient) => {
+const doTask = async (cloudClient, userNameInfo) => {
     const result = [];
     const res1 = await cloudClient.userSign();
     result.push(
-        `${res1.isSign ? "已经签到过了，" : ""}签到获得${res1.netdiskBonus}M空间`
+        `签到获得${res1.netdiskBonus}M空间`
     );
     await delay(5000);
 
     const res2 = await cloudClient.taskSign();
     buildTaskResult(res2, result);
+    logger.info(`用户 ${userNameInfo} 本次签到结果: ${result.join(", ")}`)
     return result;
 };
 
@@ -54,24 +55,26 @@ const doFamilyTask = async (cloudClient, userNameInfo) => {
     let totalBonusSpace = 0;
 
     if (myfamilyID) {
-        console.log(`签到familyID 的值是: ${myfamilyID}`);
+        logger.info(`签到familyID 的值是: ${myfamilyID}`);
     } else {
-        console.log('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
+        logger.info('familyID 未设置，等会显示的就是家庭ID ，然后去创建myfamilyID变量');
     }
     const result = [];
     if (familyInfoResp) {
         for (let index = 0; index < familyInfoResp.length; index += 1) {
             const { familyId } = familyInfoResp[index];
-            console.log(`本账号的familyID 的值是: ${familyId}`);
+            logger.info(`本账号的familyID 的值是: ${familyId}`);
             const res = await cloudClient.familyUserSign(myfamilyID);
             const bonusSpace = res.bonusSpace || 0;
             totalBonusSpace += bonusSpace;
             result.push(
-                `用户${userNameInfo}家庭任务: ${res.signStatus ? "已经签到过了，" : ""}签到获得${
-                bonusSpace
+                `家庭签到获得${
+                    bonusSpace
                 }M空间`
             );
+
         }
+        logger.info(`用户 ${userNameInfo} 本次家庭签到结果: ${result.join(", ")}`);
     }
     return { result, totalBonusSpace };
 };
@@ -90,7 +93,7 @@ async function saveToken(userName, session, cookie) {
     const tokenFile = path.join(tokenDir, `${userName}.json`);
     const tokenData = { session, cookie };
     await fs.writeFile(tokenFile, JSON.stringify(tokenData), 'utf-8');
-    logger.info(`用户 ${userName} Token 已保存到 ${tokenFile}`);
+    logger.debug(`用户 ${userName} Token 已保存到 ${tokenFile}`);
 }
 
 async function loadToken(userName) {
@@ -98,7 +101,7 @@ async function loadToken(userName) {
     try {
         const data = await fs.readFile(tokenFile, 'utf-8');
         const { session, cookie } = JSON.parse(data);
-        logger.info(`用户 ${userName} Token 从 ${tokenFile} 加载成功`);
+         logger.debug(`用户 ${userName} Token 从 ${tokenFile} 加载成功`);
         return { session, cookie };
     } catch (e) {
         logger.info(`用户 ${userName} Token 加载失败，需要重新登录`);
@@ -126,12 +129,12 @@ async function main() {
      let accounts = [];
         try {
             const tyAccounts = process.env.TY_ACCOUNTS || '[]';
-            console.log('Raw TY_ACCOUNTS:', tyAccounts);  // 打印原始环境变量
+            logger.debug('Raw TY_ACCOUNTS:', tyAccounts);
              const cleanedAccounts = tyAccounts.replace(/[\r\n\t]+/g, '').trim();
-             console.log('Single-Line TY_ACCOUNTS:', cleanedAccounts); // 打印处理后的单行字符串
+            logger.debug('Single-Line TY_ACCOUNTS:', cleanedAccounts);
             accounts = JSON.parse(cleanedAccounts);
         } catch (error) {
-             console.error('Failed to parse TY_ACCOUNTS from process.env:', process.env.TY_ACCOUNTS,'Error:', error);
+             logger.error('Failed to parse TY_ACCOUNTS from process.env:', process.env.TY_ACCOUNTS,'Error:', error);
             return;
         }
 
@@ -140,14 +143,13 @@ async function main() {
            return;
        }
 
-
     for (let index = 0; index < accounts.length; index += 1) {
         const account = accounts[index];
         const { userName, password } = account;
         if (userName && password) {
             const userNameInfo = mask(userName, 3, 7);
             try {
-                logger.log(`账户 ${userNameInfo}开始执行`);
+                logger.info(`账户 ${userNameInfo}开始执行`);
                 const cloudClient = new CloudClient(userName, password);
 
                 let token = await loadToken(userName);
@@ -157,7 +159,7 @@ async function main() {
                     cloudClient.session = token.session;
                     cloudClient.cookie = token.cookie;
                     if (await validateToken(cloudClient)) {
-                        logger.info(`用户 ${userNameInfo} 使用缓存 Token 登录成功`);
+                       logger.debug(`用户 ${userNameInfo} 使用缓存 Token 登录成功`);
                         loggedIn = true;
                     }
                 }
@@ -167,17 +169,16 @@ async function main() {
                     await saveToken(userName, cloudClient.session, cloudClient.cookie);
                 }
 
-                const result = await doTask(cloudClient);
-                result.forEach((r) => logger.log(r));
+                await doTask(cloudClient, userNameInfo);
+
 
                 const { result: familyResult, totalBonusSpace } = await doFamilyTask(cloudClient, userNameInfo);
-                familyResult.forEach((r) => logger.log(r));
                 totalFamilyBonusSpace += totalBonusSpace;
-                logger.log(`用户 ${userNameInfo} 本次家庭签到获得 ${totalBonusSpace}M空间`);
+                logger.info(`用户 ${userNameInfo} 本次家庭签到获得 ${totalBonusSpace}M空间`);
 
-                logger.log("任务执行完毕");
+                logger.info("任务执行完毕");
                 const { cloudCapacityInfo, familyCapacityInfo } = await cloudClient.getUserSizeInfo();
-                logger.log(
+                logger.info(
                     `个人总容量：${(
                         cloudCapacityInfo.totalSize /
                         1024 /
@@ -196,7 +197,7 @@ async function main() {
                     throw e;
                 }
             } finally {
-                logger.log(`账户 ${userNameInfo}执行完毕`);
+                logger.info(`账户 ${userNameInfo}执行完毕`);
             }
         }
     }
