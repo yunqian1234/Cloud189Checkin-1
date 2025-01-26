@@ -21,6 +21,7 @@ const { sendNotify } = require("./sendNotify");
 
 const fs = require('fs').promises;
 const path = require('path');
+const accounts = require("./accounts.js");
 
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
 
@@ -122,19 +123,6 @@ async function validateToken(cloudClient) {
 }
 
 async function main() {
-    let accounts = [];
-    try {
-        // 从环境变量中读取 TY_ACCOUNTS
-        const tyAccounts = process.env.TY_ACCOUNTS || '[]';
-
-        // 直接解析 JSON
-        accounts = JSON.parse(tyAccounts);
-    } catch (error) {
-        console.error('Failed to parse TY_ACCOUNTS:', error);
-        console.error('TY_ACCOUNTS value:', process.env.TY_ACCOUNTS);
-    }
-
-    const familyID = process.env.FAMILYID || '';
     let totalFamilyBonusSpace = 0;
     for (let index = 0; index < accounts.length; index += 1) {
         const account = accounts[index];
