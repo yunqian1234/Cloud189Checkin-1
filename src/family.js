@@ -101,7 +101,7 @@ async function loadToken(userName) {
          logger.debug(`用户 ${userName} Token 从 ${tokenFile} 加载成功`);
         return { session, cookie };
     } catch (e) {
-        logger.info(`用户 ${userName} Token 加载失败，需要重新登录`);
+        logger.debug(`用户 ${userName} Token 加载失败，需要重新登录`);
         return null;
     }
 }
