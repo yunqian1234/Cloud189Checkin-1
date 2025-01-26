@@ -15,10 +15,12 @@ jobs:
     environment: user
     steps:
       - uses: actions/checkout@main
+
       - name: Setup Node.js environment
         uses: actions/setup-node@main
         with:
           node-version: 18
+
       - name: init secrets
         uses: shine1594/secrets-to-env-action@master
         with:
@@ -26,8 +28,19 @@ jobs:
           secrets_env: production
           prefix_prod: ""
           file_name_prod: .env
+
+      # 新增步骤：打印环境变量
+      - name: Debug environment variables
+        run: |
+          echo "===== Environment Variables ====="
+          echo "ACCOUNT: ${{ secrets.ACCOUNT }}"
+          echo "PASSWORD: ${{ secrets.PASSWORD }}"
+          echo "All environment variables:"
+          printenv
+
       - name: init
         run: npm install
+
       - name: run
         id: run
         uses: nick-fields/retry@master
@@ -35,6 +48,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           command: npm start
+
       - name: Keep Running
         run: |
           git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
@@ -43,6 +57,7 @@ jobs:
           git pull --rebase --autostash
           git commit --allow-empty -m "Keep Running..."
           git push
+
       - name: Delete old workflow run
         uses: Mattraks/delete-workflow-runs@main
         with:
