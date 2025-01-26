@@ -122,7 +122,14 @@ async function validateToken(cloudClient) {
 }
 
 async function main() {
-    const accounts = JSON.parse(process.env.TY_ACCOUNTS || '[]');
+    let accounts = [];
+    try {
+        accounts = JSON.parse(process.env.TY_ACCOUNTS || '[]');
+    } catch (error) {
+        console.error('Failed to parse TY_ACCOUNTS:', error);
+        console.error('TY_ACCOUNTS value:', process.env.TY_ACCOUNTS);
+    }
+
     const familyID = process.env.FAMILYID || '';
     let totalFamilyBonusSpace = 0;
     for (let index = 0; index < accounts.length; index += 1) {
