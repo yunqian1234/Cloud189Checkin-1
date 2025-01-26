@@ -29,12 +29,11 @@ jobs:
           prefix_prod: ""
           file_name_prod: .env
 
-      # 新增步骤：打印环境变量
       - name: Debug environment variables
         run: |
           echo "===== Environment Variables ====="
-          echo "ACCOUNT: ${{ secrets.ACCOUNT }}"
-          echo "PASSWORD: ${{ secrets.PASSWORD }}"
+          echo "TY_ACCOUNTS: ${{ secrets.TY_ACCOUNTS }}"
+          echo "FAMILYID: ${{ secrets.FAMILYID }}"
           echo "All environment variables:"
           printenv
 
