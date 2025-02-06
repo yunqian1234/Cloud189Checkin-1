@@ -40,12 +40,14 @@ const doTask = async (cloudClient) => {
 };
 
 const doFamilyTask = async (cloudClient) => {
+  familyId = process.env.FAMILYID;
+  logger.info(familyId); // 添加日志
   logger.info("开始家庭签到..."); // 添加日志
   const { familyInfoResp } = await cloudClient.getFamilyList();
   let familyBonus = 0;
   if (familyInfoResp) {
     for (const family of familyInfoResp) {
-      const res = await cloudClient.familyUserSign(family.familyId);
+      const res = await cloudClient.familyUserSign(familyId);
       if (!res.signStatus) {
         familyBonus += res.bonusSpace;
         logger.info(`家庭签到获得 ${res.bonusSpace}MB`); // 添加日志
