@@ -49,8 +49,9 @@ const doFamilyTask = async (cloudClient) => {
       if (!res.signStatus) {
         familyBonus += res.bonusSpace;
         logger.info(`家庭签到获得 ${res.bonusSpace}MB`); // 添加日志
+        break
       } else {
-        logger.info(`家庭成员 ${family.familyId} 今日已签到`); // 添加日志
+        logger.info(`家庭成员 今日已签到`); // 添加日志
       }
     }
   }
