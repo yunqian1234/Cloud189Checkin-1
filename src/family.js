@@ -83,7 +83,7 @@ async function main() {
         const personalBonus = await doTask(cloudClient);
         const familyBonus = await doFamilyTask(cloudClient);
 
-        results.push(`账号${index + 1}，个人签到${personalBonus}MB，家庭签到${familyBonus}MB`);
+        results.push(`账号${index + 1}，${userNameInfo}个人签到${personalBonus}MB，家庭签到${familyBonus}MB`);
         totalFamilyBonus += familyBonus; // 汇总家庭奖励到第一个账号
 
       } catch (e) {
