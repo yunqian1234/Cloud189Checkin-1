@@ -91,6 +91,7 @@ async function main() {
         results.push(`账号${index + 1} 执行失败`);
       }
         logger.info(`**** 账号 ${userNameInfo} 执行完毕 ****`); // 添加日志
+        await delay(5000); // 延迟5秒
     }
   }
 
