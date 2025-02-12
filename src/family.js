@@ -6,7 +6,7 @@ const log4js = require('log4js');
 const { CloudClient } = require('cloud189-sdk');
 const { sendNotify } = require('./sendNotify');
 // 新增环境变量处理（在日志配置之前）
-const EXEC_THRESHOLD = parseInt(process.env.FIRSTACCOUNT || 1); // 默认值为1
+const EXEC_THRESHOLD = parseInt(process.env.EXEC_THRESHOLD || 1); // 默认值为1
 // 日志配置
 log4js.configure({
   appenders: {
