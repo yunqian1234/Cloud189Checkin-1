@@ -116,8 +116,8 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   try {
     logger.debug('🔥 启动专项压力测试');
     const accounts = require('./accounts');
-    // const familyId = process.env.FAMILYID;
-    const familyId = 128907098394887;
+    const familyId = process.env.FAMILYID;
+
     if (!familyId) throw new Error('未配置环境变量 FAMILYID');
 
     let totalFamily = 0; let
