@@ -1,4 +1,6 @@
 /* eslint-disable no-await-in-loop */
+/* cron: 0 7,19 * * *
+const $ = new Env('天翼网盘签到'); */
 require('dotenv').config();
 const log4js = require('log4js');
 const { CloudClient } = require('cloud189-sdk');
