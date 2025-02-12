@@ -4,7 +4,7 @@ const log4js = require('log4js');
 const { CloudClient } = require('cloud189-sdk');
 const { sendNotify } = require('./sendNotify');
 // 新增环境变量处理（在日志配置之前）
-const FIRST_ACCOUNT = parseInt(process.env.FIRSTACCOUNT || 1); // 默认值为1
+const EXEC_THRESHOLD = parseInt(process.env.FIRSTACCOUNT || 1); // 默认值为1
 // 日志配置
 log4js.configure({
   appenders: {
@@ -134,7 +134,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       let personalCount = 10;
       let familyCount = 10;
 
-      if (FIRST_ACCOUNT === 1) {
+      if (EXEC_THRESHOLD === 1) {
         if (index === 0) { // 第一个账号
           personalCount = 1;
           familyCount = 1;
@@ -143,9 +143,9 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
           familyCount = 10;
         }
       } else { // 其他账号
-        personalCount = FIRST_ACCOUNT;
-        familyCount = FIRST_ACCOUNT;
-      }// 若 FIRST_ACCOUNT=0 保持默认值10
+        personalCount = EXEC_THRESHOLD;
+        familyCount = EXEC_THRESHOLD;
+      }// 若 EXEC_THRESHOLD=0 保持默认值10
       const result = await stressTest(
         { userName: account.userName, password: account.password },
         familyId,
