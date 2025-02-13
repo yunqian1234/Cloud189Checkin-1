@@ -122,8 +122,16 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
     if (!familyId) throw new Error('未配置环境变量 FAMILYID');
 
-    let totalFamily = 0; let
-      totalActualFamily = 0;
+    let mainAccountClient; // 存储主账号的客户端实例
+    if (accounts.length > 0) {
+      const mainAccount = accounts[0];
+      mainAccountClient = new CloudClient(mainAccount.userName, mainAccount.password);
+      await mainAccountClient.login();
+      const initialSizeInfo = await mainAccountClient.getUserSizeInfo();
+      logger.debug(`[${Date.now()}] 🏠 家庭签到 之前 : ${initialSizeInfo}`);
+    }
+    let totalFamily = 0;
+    let totalActualFamily = 0;
     const reports = [];
 
     for (let index = 0; index < accounts.length; index++) {
@@ -166,12 +174,14 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         await sleep(5000);
       }
     }
-
+    // 3. 主账号再次获取最终容量并计算差值
+    const finalSizeInfo = await mainAccountClient.getUserSizeInfo();
+    logger.debug(`[${Date.now()}] 🏠 家庭签到 之后: ${initialSizeInfo}`);
+    const actualFamilyTotal = (finalSizeInfo.familyCapacityInfo.totalSize - initialSizeInfo.familyCapacityInfo.totalSize) / 1024 / 1024;
     const finalReport = [
       reports.join('\n\n'),
       `🏠 所有家庭签到累计获得: ${totalFamily}MB`,
-      `📈 实际家庭容量总增加: ${totalActualFamily.toFixed(2)}MB`,
-      `⏱️ 执行耗时: ${benchmark.lap()}`,
+      `📈 实际家庭容量总增加: ${actualFamilyTotal.toFixed(2)}MB``⏱️ 执行耗时: ${benchmark.lap()}`,
     ].join('\n\n');
 
     sendNotify('天翼云压力测试报告', finalReport);
