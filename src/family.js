@@ -128,7 +128,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       mainAccountClient = new CloudClient(mainAccount.userName, mainAccount.password);
       await mainAccountClient.login();
       const initialSizeInfo = await mainAccountClient.getUserSizeInfo();
-      logger.debug(`[${Date.now()}] 🏠 家庭签到 之前 : ${initialSizeInfo}`);
+      logger.debug(`[${Date.now()}] 🏠 家庭签到 之前 : ${initialSizeInfo.familyCapacityInfo.totalSize}`);
     }
     let totalFamily = 0;
     let totalActualFamily = 0;
@@ -176,7 +176,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     }
     // 3. 主账号再次获取最终容量并计算差值
     const finalSizeInfo = await mainAccountClient.getUserSizeInfo();
-    logger.debug(`[${Date.now()}] 🏠 家庭签到 之后: ${initialSizeInfo}`);
+    logger.debug(`[${Date.now()}] 🏠 家庭签到 之后: ${finalSizeInfo.familyCapacityInfo.totalSize}`);
     const actualFamilyTotal = (finalSizeInfo.familyCapacityInfo.totalSize - initialSizeInfo.familyCapacityInfo.totalSize) / 1024 / 1024;
     const finalReport = [
       reports.join('\n\n'),
