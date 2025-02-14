@@ -21,10 +21,10 @@ const { CloudClient } = require("cloud189-sdk");
 const accounts = require("./accounts");
 const { sendNotify } = require("./sendNotify");
 
-// 假设从环境变量中获取 WxPusher 配置
+// 直接使用你提供的 WxPusher 配置
 const wxpush = {
-    appToken: process.env.WXPUSHER_APPTOKEN,
-    uid: process.env.WXPUSHER_UID
+    appToken: 'AT_OzwCik0QP4p4AQlKdO4jbgjWApTiWsJr',
+    uid: 'UID_515ENQo5aFZCOak8kkF8VTh7Va5p'
 };
 
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
